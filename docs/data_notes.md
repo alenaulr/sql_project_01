@@ -1,6 +1,6 @@
 # Data Notes – sql_project_01 Food Accessibility
 
-Last updated: 2026-01-17  
+Last updated: 2026-02-22  
 Author: Alena Ulrichova
 
 ## 1) Purpose
@@ -116,3 +116,28 @@ FROM e
 JOIN c ON c.c_country_norm = e.e_country_norm
 WHERE c.continent = 'Europe'
   AND e.year IN (SELECT year FROM data_academy_content.v_common_years);  -- adjust schema if needed
+```
+
+## 6) Analysis Notes - Research Questions
+
+### 6.1 Question 1 (Are wages rising across all sectors over the years, or are they falling in some?)
+
+#### 6.1.1 Analysis Notes
+- Analysis is based on the **primary final table** (`data_academy_content.t_alena_ulrichova_project_sql_primary_final`).
+- Because the primary final table has grain `industry × product × year`, wage values are repeated across products for the same `industry × year`.
+- To evaluate wage trends correctly, wages are first aggregated to **industry × year**.
+- Year-over-year (YoY) wage growth is then calculated using a **window function** (`LAG`).
+- The first available year for each industry has `NULL` YoY growth (no previous year for comparison).
+- Negative YoY values indicate a year-on-year wage decline in a given industry.
+
+### 6.2 Question 2 (How many liters of milk and kilograms of bread can be purchased for the average wage in the first and last comparable period?)
+
+#### 6.2.1 Analysis Notes
+- Analysis is based on the **primary final table** (`data_academy_content.t_alena_ulrichova_project_sql_primary_final`).
+- The helper column `purchasable_units_per_avg_wage` is used to represent purchasing power:
+  - `avg_wage_czk / avg_price_per_unit_czk`
+- Because the primary final table has grain `industry × product × year`, purchasing power values are repeated across industries for the same `product × year`.
+- To evaluate purchasing power by product correctly, values are first aggregated to **product × year** using `AVG(purchasable_units_per_avg_wage)`.
+- The analysis is filtered to product names containing **milk** (`mléko`) and **bread** (`chléb`).
+- The first and last available comparable years are identified from the filtered dataset (`MIN(year)`, `MAX(year)`).
+- Results are presented as the number of standardized units (liters / kilograms) purchasable for the average wage in the first and last year.
