@@ -50,8 +50,6 @@ The following final tables are created in the database:
   Q3: Which food category increases in price the slowest (lowest YoY percentage increase)?
 - `sql/14_q4_prices_vs_wages_gap.sql`  
   Q4: Is there a year in which food prices increased significantly more than wages (more than 10 percentage points)?
-- `sql/14a_q4_debug_prices_vs_wages_gap.sql`  
-  Debug/support query for Q4 (step-by-step validation of yearly aggregates, YoY logic, and gap calculation).
 - `sql/15_q5_gdp_effect.sql`  
   Q5: Does GDP growth relate to wage and food price changes in the same year or the following year?
 
@@ -76,8 +74,6 @@ If you want to rebuild the project outputs from scratch, run the scripts in this
 9. `sql/13_q3_yoy_price_difference.sql`
 10. `sql/14_q4_prices_vs_wages_gap.sql`
 11. `sql/15_q5_gdp_effect.sql`
-
-> `sql/14a_q4_debug_prices_vs_wages_gap.sql` is optional and was used to validate the Q4 logic when the final filtered query returned no rows.
 
 ## Documentation
 Detailed methodology and data-quality notes are documented in:

@@ -1,6 +1,6 @@
 # Data Notes – sql_project_01 Food Accessibility
 
-Last updated: 2026-02-22  
+Last updated: 2026-03-28  
 Author: Alena Ulrichova
 
 ## 1) Purpose
@@ -168,8 +168,7 @@ WHERE c.continent = 'Europe'
 - The first available year has `NULL` YoY values and is excluded from comparison.
 - Positive gap values indicate faster price growth than wage growth; the threshold identifies years with a materially higher increase in food prices.
 - In this project run, the final filtered query returned **no rows**, which is interpreted as a **valid negative finding** (no year met the `> 0.10` condition), not as a query error.
-- To validate the result, I created a separate debug SQL file with step-by-step checks (yearly aggregates, join validation, YoY calculation without the final threshold filter, and gap ranking):
-  - `sql/14a_q4_debug_prices_vs_wages_gap.sql`
+- The result was validated using step-by-step checks (yearly aggregates, YoY calculations without the threshold filter, and ranking years by the gap) to confirm that the absence of rows is caused by the `> 0.10` condition rather than missing data.
 
 ### 6.5 Question 5 (Does GDP growth influence changes in wages and food prices in the same or the following year?)
 
