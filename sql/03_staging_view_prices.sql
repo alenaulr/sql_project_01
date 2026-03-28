@@ -1,16 +1,3 @@
-SELECT
-  cp.category_code,
-  cpc.name AS product_name,
-  cpc.price_value,
-  cpc.price_unit,
-  cp.value AS price_czk,
-  cp.date_from AS price_date
-FROM czechia_price cp
-JOIN czechia_price_category cpc
-  ON cpc.code = cp.category_code
-WHERE cp.region_code IS NULL
-LIMIT 20;
-
 DROP VIEW IF EXISTS v_prices_yearly;
 CREATE VIEW v_prices_yearly AS
 WITH normalized AS (
@@ -28,7 +15,7 @@ WITH normalized AS (
     CASE
       WHEN cpc.price_unit = 'g'  THEN (cp.value / NULLIF(cpc.price_value,0)) * 1000  -- per 1 kg
       WHEN cpc.price_unit = 'ml' THEN (cp.value / NULLIF(cpc.price_value,0)) * 1000  -- per 1 l
-      ELSE (cp.value / NULLIF(cpc.price_value,0))                                     -- per 1 kg / 1 l / 1 ks
+      ELSE (cp.value / NULLIF(cpc.price_value,0))                                    -- per 1 kg / 1 l / 1 ks
     END AS price_per_unit_czk
   FROM czechia_price cp
   JOIN czechia_price_category cpc
