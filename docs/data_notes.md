@@ -1,10 +1,10 @@
 # Data Notes – sql_project_01 Food Accessibility
 
-Last updated: 2026-03-28  
+Last updated: 2026-03-29  
 Author: Alena Ulrichova
 
 ## 1) Purpose
-This document records data quality findings, assumptions, filters, and transformations so the analysis is reproducible and auditable.
+This document records data quality findings, assumptions, filters, and transformations so the analysis is reproducible and auditable. Final answers and key figures are summarized in README.
 
 ## 2) Data Sources
 - `czechia_payroll` + reference tables:
@@ -59,13 +59,16 @@ Filter by `value_type_code = 5958`. Aggregated to `year × industry`.
 
 ### 4.3 Common years
 `v_common_years` — intersection of years present in both staging views.
-**Schema:** 'data_academy_content' (adjust if different in your DB).
+**Schema:** `data_academy_content` (adjust if different in your DB).
 
 ### 4.4 Primary final (CZ)
 **Name:** `data_academy_content.t_alena_ulrichova_project_sql_primary_final`  
 **Grain:** 1 row = `industry × product × year` (CZ only, common years)  
 **Columns (key):** `year, industry_code, industry_name, avg_wage_czk, product_name, unit_std, avg_price_per_unit_czk, purchasable_units_per_avg_wage`  
 **Note:** `purchasable_units_per_avg_wage = avg_wage_czk / avg_price_per_unit_czk` (safety via `NULLIF`).
+
+- Primary final table is built via a single `CREATE TABLE AS` statement using CTEs (common_years, wages, prices) for clarity and reproducibility.
+- Rounding convention: monetary/unit values are rounded to 2 decimals; YoY growth rates in analysis queries are rounded to 4 decimals.
 
 
 ---
@@ -74,7 +77,7 @@ Filter by `value_type_code = 5958`. Aggregated to `year × industry`.
 
 **Name:** `data_academy_content.t_alena_ulrichova_project_sql_secondary_final`  
 **Grain:** 1 row = `country × year`  
-**Coverage:** `countries.continent = 'Europe'` and `year = v_common_years`  
+**Coverage:** `countries.continent IN 'Europe'` and `year IN v_common_years` 
 **Columns:** `year, country_name, country_code, gdp, gini, population`
 **Country code:** `iso_numeric` from `countries` (aliased to `country_code`).
 
@@ -85,7 +88,7 @@ Filter by `value_type_code = 5958`. Aggregated to `year × industry`.
 ### 5.2 Join strategy
 - Normalize names on both sides with `UPPER(TRIM(...))`.
 - Inner join `economies` ↔ `countries` on normalized name.
-- Aggregates/regions present in `economies.country` (r.g. "European Union," "Small states") are **excluded automatically** by the join (no matching row in `countries`).
+- Aggregates/regions present in `economies.country` (e.g. "European Union," "Small states") are **excluded automatically** by the join (no matching row in `countries`).
 
 ### 5.3 Decisions
 - Years: aligned to v_common_years (consistent with the primary final table)
@@ -95,9 +98,9 @@ Filter by `value_type_code = 5958`. Aggregated to `year × industry`.
 
 **Repro (simplified CTAS):**
 ```sql
-DROP TABLE IF EXISTS data_academy_content.t_alena_ulrichova_project_SQL_secondary_final;
+DROP TABLE IF EXISTS data_academy_content.t_alena_ulrichova_project_sql_secondary_final;
 
-CREATE TABLE data_academy_content.t_alena_ulrichova_project_SQL_secondary_final AS
+CREATE TABLE data_academy_content.t_alena_ulrichova_project_sql_secondary_final AS
 WITH e AS (
   SELECT year,
          UPPER(TRIM(country)) AS e_country_norm,
@@ -142,7 +145,7 @@ WHERE c.continent = 'Europe'
 - The first and last available comparable years are identified from the filtered dataset (`MIN(year)`, `MAX(year)`).
 - Results are presented as the number of standardized units (liters / kilograms) purchasable for the average wage in the first and last year.
 
-### 6.3 Question 3 (Which food category is rising in price the slowest, i.e. has the lowest year-on-year percentage increase?)
+### 6.3 Question 3 (Which food product is rising in price the slowest, i.e. has the lowest year-on-year percentage increase?)
 
 #### 6.3.1 Analysis Notes
 - Analysis is based on the **primary final table** (`data_academy_content.t_alena_ulrichova_project_sql_primary_final`).
